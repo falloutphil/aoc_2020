@@ -17,6 +17,10 @@ exec guile -e '(@ (day01) main)' -s "$0" "$@"
 	 #\newline))
    1))
 
+;; Sort small to large
+(define sorted-entry-list
+  (sort entry-list <))
+
 ;; inner loop
 ;; for each item, loop sorted values until you are > (2020-item)
 (define check-candidate
@@ -32,11 +36,11 @@ exec guile -e '(@ (day01) main)' -s "$0" "$@"
 
 (define (main args)
   ;; outer loop - iterate input.txt testing only
-  ;; viable complements using a sorted list
+  ;; viable complements using the sorted entry list
   ;; if a complement is found multiply it by the candidate
   (format #t "~%Result: ~a~%"
 	  (let loop ((el entry-list))
-	    (let ((result (check-candidate (car el) (sort entry-list <))))
+	    (let ((result (check-candidate (car el) sorted-entry-list)))
 	      (if result (* result (car el)) (loop (cdr el)))))))
 	
 ;; Run from emacs

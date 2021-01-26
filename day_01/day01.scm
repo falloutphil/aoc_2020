@@ -33,15 +33,113 @@ exec guile -e '(@ (day01) main)' -s "$0" "$@"
 	 ((= candidate-complement (car cl)) (car cl))
 	 (#t (test-car (cdr cl))))))))
 
-
+(define test-single-combination
+  (lambda (data k single-combination)
+    ;; Loop over single combination
+    (let ((count 0)
+	  (n (vector-length data))
+	  (matches '()))
+      (do ((b 0 (+ b 1)))
+	  ((= b n))
+	(when (logbit? b single-combination)
+	  (set! count (+ count 1))))
+      (if (= count k)
+	  (do ((b 0 (+ b 1)))
+	      ((= b n))
+	    (when (logbit? b single-combination)
+	      (set! matches (cons (vector-ref data b) matches)))))
+      matches)))
+      
+	
 (define (main args)
   ;; outer loop - iterate input.txt testing only
   ;; viable complements using the sorted entry list
   ;; if a complement is found multiply it by the candidate
-  (format #t "~%Result: ~a~%"
+  (format #t "~%Part 1 Result: ~a~%"
 	  (let loop ((el entry-list))
 	    (let ((result (check-candidate (car el) sorted-entry-list)))
-	      (if result (* result (car el)) (loop (cdr el)))))))
-	
+	      (if result (* result (car el)) (loop (cdr el))))))
+
+  ;; naive solution to part 2
+  (format #t "~%Part 2 Result: ~a~%"
+	  (let* ((target 2020)
+		 (c0 (car sorted-entry-list))
+		 (c1 (cadr sorted-entry-list))
+		 (max_third_c (- target c0 c1))
+		 (filtered (list->vector
+			    (filter (cut <= <> max_third_c) sorted-entry-list)))
+		 (n (vector-length filtered))
+		 (k 3))
+	    (do ((i 0 (+ i 1)))
+		((= (apply + (test-single-combination filtered k i)) target)
+		 (apply * (test-single-combination filtered k i)))))))
+  
+		 
+    
+       
 ;; Run from emacs
 ;; (main #f)
+
+;; https://codereview.stackexchange.com/questions/51938/get-distinct-combinations-of-numbers
+;; https://codereview.stackexchange.com/questions/18398/combinations-of-list-elements
+;; https://www.cs.utexas.edu/users/djimenez/utsa/cs3343/lecture25.html
+
+;; Combinations of list that less than 2020
+;; lists a and b
+;; a0 -> b0, b1, b2, b3
+;; a1 -> b0, b1, b2, b3
+
+;; a0 -> b0 ... bn
+
+;; a0 -> b0 -> c0 ... cn
+;; a0 -> b0 -> c0 -> d0 ... dn
+
+;; Take the last item and iterate it against against each items in the second last
+;; this will create a list of lists (((c0 d0) (c0 d1) (c0 d2)) ((c1 d0) (c1 d1) (c1 d2))) then flatten:
+;; ((c0 d0) (c0 d1) (c0 d2) (c1 d0) (c1 d1) (c1 d2))
+;; Now we repeat
+;; ((c0 d0) (c0 d1) (c0 d2) (c1 d0) (c1 d1) (c1 d2) .... (cn dn))
+;; b0 -> ((c0 d0) (c0 d1) (c0 d2) (c1 d0) (c1 d1) (c1 d2) .... (cn dn))
+;; b1 -> ((c0 d0) (c0 d1) (c0 d2) (c1 d0) (c1 d1) (c1 d2) .... (cn dn))
+;; ((b0 c0 d0) (b0 c0 d1) (b0 c0 d2) (b0 c1 d0) (b0 c1 d1) (b0 c1 d2) .... (bn cn dn))
+
+;; Requires SRFI 26
+(define (combos lst)
+  (if (null? lst) '(())
+      (let* ((a (car lst))
+             (d (cdr lst))
+             (s (combos d))
+             (v (map (cut cons a <>) s)))
+        (append s v))))
+
+
+(define (threes lst)
+  (if (= (length lst) 3) (list lst)
+      (let* ((a (car lst))
+             (d (cdr lst))
+             (s (threes d))
+             (v (map (cut cons a <>) s)))
+        (append s v))))
+
+#!
+(1 2)
+a 1
+d (2)
+s (combos (2)) **
+----
+(2)
+a 2
+d ()
+s (combos ()) *
+----
+(())
+----
+s (()) *
+v map cons 2 (()) = ((2))
+append (()) ((2)) = (() (2))
+-----
+s (() (2)) **
+v map cons 1 (() (2)) = ((1) (1 2))
+append (() (2) (1) (1 2))
+!#
+

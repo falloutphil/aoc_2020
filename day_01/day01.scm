@@ -69,14 +69,14 @@ exec guile -e '(@ (day01) main)' -s "$0" "$@"
 		 (filtered (list->vector
 			    (filter (cut <= <> max_third_c) sorted-entry-list)))
 		 (n (vector-length filtered))
+		 (combos (ash 1 n))
 		 (k 3))
 	    (do ((i 0 (+ i 1)))
-		((= (apply + (test-single-combination filtered k i)) target)
+		((or (= (apply + (test-single-combination filtered k i)) target)
+		     (= i combos))
 		 (apply * (test-single-combination filtered k i)))))))
   
-		 
-    
-       
+		        
 ;; Run from emacs
 ;; (main #f)
 

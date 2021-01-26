@@ -21,7 +21,7 @@ exec guile -e '(@ (day01) main)' -s "$0" "$@"
 (define sorted-entry-list
   (sort entry-list <))
 
-;; inner loop
+;; inner loop for part 1
 ;; for each item, loop sorted values until you are > (2020-item)
 (define check-candidate
   (lambda (candidate complement-list)
@@ -33,16 +33,25 @@ exec guile -e '(@ (day01) main)' -s "$0" "$@"
 	 ((= candidate-complement (car cl)) (car cl))
 	 (#t (test-car (cdr cl))))))))
 
+;; naively test a single binary number that
+;; represents a single of combination
+;; of candidates from the file.
+;; A '1' includes the corresponding number
+;; in the same file position as the bit position
+;; A '0' means that number is not part of this
+;; combination.
 (define test-single-combination
   (lambda (data k single-combination)
     ;; Loop over single combination
     (let ((count 0)
 	  (n (vector-length data))
 	  (matches '()))
-      (do ((b 0 (+ b 1)))
-	  ((= b n))
-	(when (logbit? b single-combination)
+      (do ((b 0 (+ b 1))) ; init update
+	  ((= b n)) ; test (no result)
+	(when (logbit? b single-combination) ;; loop body
 	  (set! count (+ count 1))))
+      ;; If we get exactly 3 values, redo loop
+      ;; and build up list (assumes sparse hits, hence loop twice)
       (if (= count k)
 	  (do ((b 0 (+ b 1)))
 	      ((= b n))
@@ -65,6 +74,9 @@ exec guile -e '(@ (day01) main)' -s "$0" "$@"
 	  (let* ((target 2020)
 		 (c0 (car sorted-entry-list))
 		 (c1 (cadr sorted-entry-list))
+		 ;; the max 3rd item cannot be larger
+		 ;; than the difference between the target
+		 ;; and the sum of the two smallest candidates
 		 (max_third_c (- target c0 c1))
 		 (filtered (list->vector
 			    (filter (cut <= <> max_third_c) sorted-entry-list)))

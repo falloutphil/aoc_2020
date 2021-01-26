@@ -81,11 +81,13 @@ exec guile -e '(@ (day01) main)' -s "$0" "$@"
 		 (filtered (list->vector
 			    (filter (cut <= <> max_third_c) sorted-entry-list)))
 		 (n (vector-length filtered))
-		 (combos (ash 1 n))
+		 (combos (ash 1 n)) ; total possible combinations of our input data
 		 (k 3))
 	    (do ((i 0 (+ i 1)))
+		;; combo with exactly 3 items, sum them to see if it matches target
 		((or (= (apply + (test-single-combination filtered k i)) target)
-		     (= i combos))
+		     (= i combos)) ; nothing found, give up
+		 ;; if sum matches target, then print out the product
 		 (apply * (test-single-combination filtered k i)))))))
   
 		        

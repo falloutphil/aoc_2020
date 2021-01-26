@@ -49,9 +49,10 @@ exec guile -e '(@ (day01) main)' -s "$0" "$@"
       (do ((b 0 (+ b 1))) ; init update
 	  ((= b n)) ; test (no result)
 	(when (logbit? b single-combination) ;; loop body
-	  (set! count (+ count 1))))
-      ;; If we get exactly 3 values, redo loop
+	  (set! count (+ count 1)))) ;; count nuber of '1's
+      ;; If we get exactly three '1's, redo loop
       ;; and build up list (assumes sparse hits, hence loop twice)
+      ;; mapping each '1' to a value in our input.
       (if (= count k)
 	  (do ((b 0 (+ b 1)))
 	      ((= b n))

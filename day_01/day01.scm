@@ -109,6 +109,7 @@ exec guile -e '(@ (day01) main)' -s "$0" "$@"
 		 (max_third_c (- target c0 c1))
 		 (filtered (filter (cut <= <> max_third_c) sorted-entry-list))
 		 (k 3)
+		 ;; should break on result - don't use filter?
 		 (result (filter (lambda (c) (and (= k (length c))
 						  (= target (apply + c)))) (list-combos filtered))))
 	  (apply * (car result)))))

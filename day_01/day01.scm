@@ -60,6 +60,13 @@ exec guile -e '(@ (day01) main)' -s "$0" "$@"
 	      (set! matches (cons (vector-ref data b) matches)))))
       matches)))
       
+(define (list-combos lst)
+  (if (null? lst) '(())
+      (let* ((a (car lst))
+             (d (cdr lst))
+             (s (list-combos d))
+             (v (map (cut cons a <>) s)))
+        (append s v))))
 	
 (define (main args)
   ;; outer loop - iterate input.txt testing only
@@ -89,9 +96,24 @@ exec guile -e '(@ (day01) main)' -s "$0" "$@"
 		((or (= (apply + (test-single-combination filtered k i)) target)
 		     (= i combos)) ; nothing found, give up
 		 ;; if sum matches target, then print out the product
-		 (apply * (test-single-combination filtered k i)))))))
-  
-		        
+		 (apply * (test-single-combination filtered k i))))))
+
+  ;; recursion solution to part 2
+  (format #t "~%Part 2 Result: ~a~%"
+	  (let* ((target 2020)
+		 (c0 (car sorted-entry-list))
+		 (c1 (cadr sorted-entry-list))
+		 ;; the max 3rd item cannot be larger
+		 ;; than the difference between the target
+		 ;; and the sum of the two smallest candidates
+		 (max_third_c (- target c0 c1))
+		 (filtered (filter (cut <= <> max_third_c) sorted-entry-list))
+		 (k 3)
+		 (result (filter (lambda (c) (and (= k (length c))
+						  (= target (apply + c)))) (list-combos filtered))))
+	  (apply * (car result)))))
+	    
+
 ;; Run from emacs
 ;; (main #f)
 
@@ -118,23 +140,6 @@ exec guile -e '(@ (day01) main)' -s "$0" "$@"
 ;; b1 -> ((c0 d0) (c0 d1) (c0 d2) (c1 d0) (c1 d1) (c1 d2) .... (cn dn))
 ;; ((b0 c0 d0) (b0 c0 d1) (b0 c0 d2) (b0 c1 d0) (b0 c1 d1) (b0 c1 d2) .... (bn cn dn))
 
-;; Requires SRFI 26
-(define (combos lst)
-  (if (null? lst) '(())
-      (let* ((a (car lst))
-             (d (cdr lst))
-             (s (combos d))
-             (v (map (cut cons a <>) s)))
-        (append s v))))
-
-
-(define (threes lst)
-  (if (= (length lst) 3) (list lst)
-      (let* ((a (car lst))
-             (d (cdr lst))
-             (s (threes d))
-             (v (map (cut cons a <>) s)))
-        (append s v))))
 
 #!
 (1 2)
